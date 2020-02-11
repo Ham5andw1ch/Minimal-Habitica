@@ -1,0 +1,64 @@
+package com.example.habiticalist;
+
+import android.os.Bundle;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputLayout;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity {
+    static ArrayList<Task> tasks = new ArrayList<Task>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        final GlobalVariables globalVariable = (GlobalVariables) getApplicationContext();
+        TextInputLayout apiUser = findViewById(R.id.apiUser);
+        TextInputLayout apiKey = findViewById(R.id.apiKey);
+        apiUser.getEditText().getText().append(globalVariable.getApiUser());
+        apiKey.getEditText().getText().append(globalVariable.getApiKey());
+        //Save the API Key and User
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TextInputLayout apiUser = findViewById(R.id.apiUser);
+                TextInputLayout apiKey = findViewById(R.id.apiKey);
+                final GlobalVariables globalVariable = (GlobalVariables) getApplicationContext();
+                globalVariable.setKeys(apiUser.getEditText().getText().toString(),apiKey.getEditText().getText().toString());
+            }
+        });
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+
+        return super.onOptionsItemSelected(item);
+    }
+}
