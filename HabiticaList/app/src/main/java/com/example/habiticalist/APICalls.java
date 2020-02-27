@@ -136,4 +136,38 @@ public class APICalls {
         return null;
 
     }
+
+    /*
+    This method returns the JSON data of the user. This can be parsed as needed.
+     */
+    public static String getUser(String apiUser, String apiKey){
+        try {
+            //Open a url connection to get to the user's tasks
+            URL url = new URL("https://habitica.com/api/v3/user/");
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("x-api-user", apiUser);
+            urlConnection.setRequestProperty("x-api-key", apiKey);
+            urlConnection.setRequestMethod("GET");
+
+            //TODO use this variable for API Key and User validation
+            String in = urlConnection.getResponseMessage();
+
+            //Assemble the output
+            InputStream in1 = new BufferedInputStream(urlConnection.getInputStream());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in1));
+            String result = "";
+            String line;
+            while ((line = reader.readLine())!= null){
+                result += line;
+            }
+            urlConnection.disconnect();
+
+            //return the json
+            return result;
+        } catch (Exception e){
+            Log.e("Error:",Log.getStackTraceString(e));
+        }
+        return null;
+
+    }
 }

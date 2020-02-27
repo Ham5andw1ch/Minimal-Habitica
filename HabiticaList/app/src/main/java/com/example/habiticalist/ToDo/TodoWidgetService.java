@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TimeZone;
 
 public class TodoWidgetService extends RemoteViewsService {
@@ -34,6 +35,7 @@ public class TodoWidgetService extends RemoteViewsService {
         private Context context;
         private int appWidgetId;
         private String[] test = {"one", "two", "three"};
+        private HashMap<String,Task> taskID = new HashMap<String,Task>();
         private ArrayList<Task> tasks = new ArrayList<Task>();
         private boolean ranFromSelf = false;
 
@@ -104,10 +106,10 @@ public class TodoWidgetService extends RemoteViewsService {
             return false;
         }
 
-        protected void executeAfter(String result) {
+        protected void executeAfter(String[] result) {
             tasks.clear();
             try {
-                JSONObject obj = new JSONObject(result);
+                JSONObject obj = new JSONObject(result[0]);
                 JSONArray array = obj.getJSONArray("data");
                 for (int i = 0; i < array.length(); i++) {
                     try {
@@ -133,9 +135,24 @@ public class TodoWidgetService extends RemoteViewsService {
                                 //t.setDate(array.getJSONObject(i).getString("date"));
                             }else{
                             }
-                            tasks.add(t);
+                            taskID.put(t.getId(),t);
                         }
                     } catch (JSONException e) {
+
+                    }
+                }
+
+                Log.d("Test","Alive2");
+                JSONObject orderString = new JSONObject(result[1]);
+                JSONArray todo = orderString.getJSONObject("data").getJSONObject("tasksOrder").getJSONArray("todos");
+                for(int i = 0; i < todo.length(); i++){
+                    try{
+                        if(taskID.get(todo.getString(i)) != null) {
+                            Log.d("Test",taskID.get(todo.getString(i)).getName() + " " + i);
+                            tasks.add(taskID.get(todo.getString(i)));
+                        }
+                    }
+                    catch (JSONException e){
 
                     }
                 }
@@ -149,16 +166,16 @@ public class TodoWidgetService extends RemoteViewsService {
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list);
     }
 
-    private class APITask extends AsyncTask<String, Void, String> {
+    private class APITask extends AsyncTask<String, Void, String[]> {
 
-            protected String doInBackground(String... args) {
+            protected String[] doInBackground(String... args) {
                 //TODO remove the case statement
                 final GlobalVariables globalVariable = (GlobalVariables) context.getApplicationContext();
                 String apiUser = globalVariable.getApiUser();
                 String apiKey = globalVariable.getApiKey();
                 switch (args[0]) {
                     case "refresh":
-                        return APICalls.getTasks(apiUser,apiKey);
+                        return new String[]{APICalls.getTasks(apiUser,apiKey), APICalls.getUser(apiUser,apiKey)};
                     default:
                         return null;
 
@@ -166,7 +183,7 @@ public class TodoWidgetService extends RemoteViewsService {
 
             }
 
-            protected void onPostExecute(String feed) {
+            protected void onPostExecute(String[] feed) {
                 if (feed != null) {
                     executeAfter(feed);
                 }
