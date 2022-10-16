@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -73,6 +74,9 @@ public class DailyWidgetService extends RemoteViewsService {
             RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.todo_layout_widget);
             rv.setTextViewText(R.id.listTitleWidget, tasks.get(position).getName());
             rv.setTextViewText(R.id.listDueDateWidget, tasks.get(position).getDate());
+            GlobalVariables globalVariable = (GlobalVariables) context.getApplicationContext();
+            rv.setInt(R.id.listTitleWidget,"setTextColor", Color.parseColor(globalVariable.getListTextColor()));
+            rv.setInt(R.id.listDueDateWidget,"setTextColor",Color.parseColor(globalVariable.getListTextColor()));
             Intent fillInIntent = new Intent();
             fillInIntent.putExtra("delete",true);
             fillInIntent.putExtra("id",tasks.get(position).getId());

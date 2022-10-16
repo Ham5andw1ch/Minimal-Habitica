@@ -6,15 +6,31 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.solver.widgets.WidgetContainer;
 
 import com.example.habiticalist.APICalls;
 import com.example.habiticalist.GlobalVariables;
 import com.example.habiticalist.R;
 import com.example.habiticalist.User;
+
+import java.util.List;
 
 
 /**
@@ -22,6 +38,7 @@ import com.example.habiticalist.User;
  */
 public class TodoWidget extends AppWidgetProvider {
 
+    public static final String WIDGET_ID_KEY ="todoList";
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -39,14 +56,13 @@ public class TodoWidget extends AppWidgetProvider {
         // There may be multiple widgets active, so update all of them
         for (int i = 0; i < appWidgetIds.length; i++) {
             Intent intent = new Intent(context, TodoWidgetService.class);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,appWidgetIds[i]);
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,appWidgetIds[i]);
             updateAppWidget(context, appWidgetManager, appWidgetIds[i]);
             intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
             RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.todo_widget);
             rv.setRemoteAdapter(R.id.widget_list, intent);
-
             rv.setEmptyView(R.id.widget_list,R.id.empty_view);
-
+            setColors(context,rv);
             //TODO rename. I got this from the android docs and left the name in place
 
             Intent toastIntent = new Intent(context, TodoWidget.class);
@@ -76,6 +92,15 @@ public class TodoWidget extends AppWidgetProvider {
         super.onUpdate(context,appWidgetManager,appWidgetIds);
     }
 
+    private void setColors(Context context, RemoteViews rv){
+        GlobalVariables globalVariable = (GlobalVariables) context.getApplicationContext();
+        rv.setInt(R.id.box,"setBackgroundColor", Color.parseColor(globalVariable.getHeaderColor()));
+        rv.setInt(R.id.widget_list,"setBackgroundColor", Color.parseColor(globalVariable.getBackgroundColor()));
+        rv.setInt(R.id.refreshButton,"setColorFilter", Color.parseColor(globalVariable.getHeaderTextColor()));
+        rv.setInt(R.id.listTitle,"setTextColor",Color.parseColor(globalVariable.getHeaderTextColor()));
+
+    }
+
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
@@ -88,6 +113,10 @@ public class TodoWidget extends AppWidgetProvider {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (intent.hasExtra(WIDGET_ID_KEY)){
+            int[] ids = intent.getExtras().getIntArray(WIDGET_ID_KEY);
+            this.onUpdate(context,AppWidgetManager.getInstance(context),ids);
+        }
         if(intent.getAction().equals("delete")) {
             new APITask().execute(context, "score", intent.getStringExtra("id"));
         }else {

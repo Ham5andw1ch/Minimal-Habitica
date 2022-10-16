@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -79,6 +80,10 @@ public class TodoWidgetService extends RemoteViewsService {
             }else{
                 rv.setTextViewText(R.id.listDueDateWidget, "");
             }
+            GlobalVariables globalVariable = (GlobalVariables) context.getApplicationContext();
+            rv.setInt(R.id.listTitleWidget,"setTextColor",Color.parseColor(globalVariable.getListTextColor()));
+            rv.setInt(R.id.listDueDateWidget,"setTextColor",Color.parseColor(globalVariable.getListTextColor()));
+
             Intent fillInIntent = new Intent();
             fillInIntent.putExtra("delete",true);
             fillInIntent.putExtra("id",tasks.get(position).getId());
